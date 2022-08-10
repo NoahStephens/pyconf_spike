@@ -1,36 +1,46 @@
-import configparser
-from distutils.command.config import config
+from configparser import ConfigParser
+from genericpath import exists
+from pathlib import Path
+import os
 
-config_file = configparser.ConfigParser()
+class Config:
+	def __init__(self, filepath=".spike", filename="config"):
+		self.config = ConfigParser()
+		self.path = str(Path.home()) + "/" + filepath
+		self.filename = filename
+		
+		# check if there is a config, create one if there is not one
+		if not os.path.exists(self.path):
+			os.makedirs(self.path)
+			self._load_config()
+			
 
-config_file.add_section("logger")
-config_file.set("logger", "LogLevel", "Info")
-config_file.set("logger", "LogFilePath", "/tmp")
-config_file.set("logger", "LogFileName", "spike.log")
+	def _load_config(self):
+		"""loads config.ini into ConfigParser """
+		self.config.read(os.path.join("src", "config.ini"))
 
+	def _update_config(self):
+		"""updates users config file with current"""
+		with open(os.path.join(self.path, self.filename), 'w') as file:
+			self.config.write(file)
+			file.flush()
+			file.close()
 
-config_file.add_section("api_1")
-config_file.set("default", "ApiKey", "test_key_1")
-config_file.set("default", "User", "user_1")
-config_file.set("default", "Password", "pass_1")
+	def add(self, attribute):
+		""" adds formatted key into config
+			section.key.value"""
+		section, key, value = attribute.split(".")
+		self.config.set(section, key, value)
 
-config_file.add_section("api_2")
-config_file.set("default", "ApiKey", "test_key_2")
-config_file.set("default", "User", "user_2")
-config_file.set("default", "Password", "pass_2")
+	def delete(self, attribute):
+		""" removes formatted key into config
+			section.key"""
+		section, key = attribute.split(".")
+		self.config.remove_option(section, key)
 
-config_file.add_section("dev")
-config_file.set("dev", "Host", "dev.example.com")
-config_file.set("default", "Port", 37204)
+	def get(self, attribute):
+		section, key = attribute.split(".")
+		return self.config.get(section, key)
 
-config_file.add_section("orion")
-config_file.set("orion", "Host", "orion.example.com")
-config_file.set("default", "Port", 37204)
-
-config_file.add_section("stage")
-config_file.set("stage", "Host", "stage.example.com")
-config_file.set("default", "Port", 37204)
-
-config_file.add_section("prod")
-config_file.set("prod", "Host", "prod.example.com")
-config_file.set("default", "Port", 37204)
+if __name__ == "__main__":
+	config = Config(".spike_test", "config_test")
