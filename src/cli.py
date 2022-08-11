@@ -28,8 +28,7 @@ class Parser:
 		print(self.config.get(args.attribute))
 
 	def _config_set(self, args):
-		self.config.add(args.attribute)
-		print("({},{}) = {}".format(args.attribute.split(".")))
+		print(self.config.add(args.attribute))
 
 	def _config_unset(self, args):
 		self.config.remove(args.attribute)
@@ -50,6 +49,7 @@ class Parser:
 
 		config_parser = subparser.add_parser("config")
 		config_subparser = config_parser.add_subparsers()
+		
 		view_config_parser = config_subparser.add_parser("view")
 		view_config_parser.add_argument("attribute")
 		view_config_parser.set_defaults(func=self._config_view)
@@ -61,10 +61,6 @@ class Parser:
 		unset_config_parser = config_subparser.add_parser("unset")
 		unset_config_parser.add_argument("attribute")
 		unset_config_parser.set_defaults(func=self._config_unset)
-
-
-		# set_config_parser = config_parser.add_argument("set")
-		# unset_config_parser = config_parser.add_argument("unset")
 
 		return parser
 
